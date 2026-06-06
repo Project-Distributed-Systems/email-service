@@ -1,0 +1,50 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '4.0.6'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.ticket'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+    // --- Produção ---
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.aspectj:aspectjweaver'
+ 
+    runtimeOnly 'org.postgresql:postgresql'
+ 
+    // --- Testes ---
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+ 
+    // CORREÇÃO 1: artefato correto para PostgreSQL (era 'testcontainers-postgresql:2.0.5', que não existe)
+testImplementation "org.testcontainers:testcontainers-postgresql:2.0.5"
+ 
+    // CORREÇÃO 2: sem versão fixada manualmente — o BOM acima resolve tudo na mesma versão
+testImplementation "org.testcontainers:testcontainers-rabbitmq:2.0.5"
+testImplementation "org.testcontainers:testcontainers-junit-jupiter:2.0.5"
+ 
+    // CORREÇÃO 3: driver disponível em tempo de execução dos testes também
+    testRuntimeOnly 'org.postgresql:postgresql'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+ 
+    // Awaitility: espera assíncrona determinística — substitui Thread.sleep()
+    testImplementation 'org.awaitility:awaitility'
+}
+tasks.named('test') {
+	useJUnitPlatform()
+}
